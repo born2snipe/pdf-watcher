@@ -9,11 +9,11 @@
     </parent>
 
     <groupId>com.github.born2snipe</groupId>
-    <artifactId>pdf-generator-watcher</artifactId>
+    <artifactId>pdf-watcher</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>pdf-generator-watcher</name>
+    <name>pdf-watcher</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -29,7 +29,7 @@
         <dependency>
             <groupId>net.sourceforge.argparse4j</groupId>
             <artifactId>argparse4j</artifactId>
-            <version>0.6.0</version>
+            <version>0.7.0</version>
         </dependency>
 
         <dependency>
@@ -115,6 +115,43 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.2</version>
+                <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                    <transformers>
+                        <!-- Need to keep all the files found in the META-INF/service directory -->
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                        <!-- This class needs to be your Main-Class defined in your MANIFEST.MF file -->
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <mainClass>com.github.born2snipe.App</mainClass>
+                        </transformer>
+                    </transformers>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -128,7 +165,7 @@
     </licenses>
 
     <description></description>
-    <url>https://github.com/born2snipe/pdf-generator-watcher</url>
+    <url>https://github.com/born2snipe/pdf-watcher</url>
 
     <developers>
         <developer>
@@ -140,9 +177,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:born2snipe/pdf-generator-watcher.git</connection>
-        <developerConnection>scm:git:git@github.com:born2snipe/pdf-generator-watcher.git</developerConnection>
-        <url>git@github.com:born2snipe/pdf-generator-watcher.git</url>
+        <connection>scm:git:git@github.com:born2snipe/pdf-watcher.git</connection>
+        <developerConnection>scm:git:git@github.com:born2snipe/pdf-watcher.git</developerConnection>
+        <url>git@github.com:born2snipe/pdf-watcher.git</url>
     </scm>
 
 </project>
