@@ -25,6 +25,7 @@ import java.util.concurrent.CountDownLatch;
 @ServiceProvider(service = CliCommand.class)
 public class WatchAndRegeneratePdfCommand extends GeneratePdfCommand {
     private final CountDownLatch waitForControlC = new CountDownLatch(1);
+    private final Object GENERATING_PDF_LOCK = new Object();
 
     @Override
     public String getName() {
@@ -41,16 +42,28 @@ public class WatchAndRegeneratePdfCommand extends GeneratePdfCommand {
         super.executeParsedArgs(context);
 
         final CliLog log = context.getLog();
-
         final File input = context.getNamespace().get("input");
+
+        PressingOfEnterListener pressingOfEnterListener = new PressingOfEnterListener() {
+            public void enterPressed() {
+                synchronized (GENERATING_PDF_LOCK) {
+                    WatchAndRegeneratePdfCommand.super.executeParsedArgs(context);
+                    logWatchingMessage(log);
+                }
+            }
+        };
+        pressingOfEnterListener.start();
+
 
         DirectoryWatcher watcher = new DirectoryWatcher();
         watcher.addDir(input.getParentFile());
         watcher.start((file, kindOfChange) -> {
             File changedFile = file.toFile();
             if (changedFile.equals(input)) {
-                WatchAndRegeneratePdfCommand.super.executeParsedArgs(context);
-                logWatchingMessage(log);
+                synchronized (GENERATING_PDF_LOCK) {
+                    WatchAndRegeneratePdfCommand.super.executeParsedArgs(context);
+                    logWatchingMessage(log);
+                }
             }
         });
 
@@ -63,7 +76,7 @@ public class WatchAndRegeneratePdfCommand extends GeneratePdfCommand {
     }
 
     private void logWatchingMessage(CliLog log) {
-        log.warn("\nWatching for changes...\n");
+        log.info("\n@|yellow,bold Watching for changes...|@ or Press @|green [ENTER]|@ to regenerate pdf");
     }
 
     public void simulateControlC() {

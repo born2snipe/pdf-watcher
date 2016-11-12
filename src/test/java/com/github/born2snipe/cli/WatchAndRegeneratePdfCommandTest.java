@@ -56,7 +56,7 @@ public class WatchAndRegeneratePdfCommandTest {
 
     @Test
     public void shouldBlowUpIfTheInputFileDoesNotExist() {
-        assertCommandFails("File not found: 'test.html'", "-i", "test.html", "-o", "test.pdf");
+        assertCommandFails("File not found: 'does-not-exist.html'", "-i", "does-not-exist.html", "-o", "test.pdf");
     }
 
     @Test
