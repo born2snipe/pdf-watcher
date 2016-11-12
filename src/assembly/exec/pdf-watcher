@@ -1,0 +1,8 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# stop making a window without a window on mac and hijacking the focus
+PROPS="-Djava.awt.headless=true "
+
+java $PROPS -jar "$DIR/lib/pdf-watcher.jar" "$@"
