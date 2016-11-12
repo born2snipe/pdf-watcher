@@ -17,6 +17,7 @@ import cli.pi.CliLog;
 import cli.pi.command.CliCommand;
 import cli.pi.command.CommandContext;
 import com.github.born2snipe.cli.io.DirectoryWatcher;
+import net.sourceforge.argparse4j.impl.Arguments;
 import org.openide.util.lookup.ServiceProvider;
 
 import java.io.File;
@@ -26,6 +27,14 @@ import java.util.concurrent.CountDownLatch;
 public class WatchAndRegeneratePdfCommand extends GeneratePdfCommand {
     private final CountDownLatch waitForControlC = new CountDownLatch(1);
     private final Object GENERATING_PDF_LOCK = new Object();
+
+    public WatchAndRegeneratePdfCommand() {
+        argsParser.addArgument("-d", "--debug")
+                .type(boolean.class)
+                .action(Arguments.storeTrue())
+                .dest("debug")
+                .help("Display all debug information to the console");
+    }
 
     @Override
     public String getName() {
@@ -43,6 +52,7 @@ public class WatchAndRegeneratePdfCommand extends GeneratePdfCommand {
 
         final CliLog log = context.getLog();
         final File input = context.getNamespace().get("input");
+        final boolean debug = context.getNamespace().get("debug");
 
         PressingOfEnterListener pressingOfEnterListener = new PressingOfEnterListener() {
             public void enterPressed() {
@@ -59,6 +69,10 @@ public class WatchAndRegeneratePdfCommand extends GeneratePdfCommand {
         watcher.addDir(input.getParentFile());
         watcher.start((file, kindOfChange) -> {
             File changedFile = file.toFile();
+            if (debug) {
+                log.info("@|yellow [FILE CHANGE]|@ " + kindOfChange + " -- " + file);
+            }
+
             if (changedFile.equals(input)) {
                 synchronized (GENERATING_PDF_LOCK) {
                     WatchAndRegeneratePdfCommand.super.executeParsedArgs(context);

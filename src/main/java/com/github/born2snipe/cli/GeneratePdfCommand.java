@@ -24,6 +24,8 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @ServiceProvider(service = CliCommand.class)
 public class GeneratePdfCommand extends CliCommand {
@@ -66,7 +68,8 @@ public class GeneratePdfCommand extends CliCommand {
         try (OutputStream o = new BufferedOutputStream(new FileOutputStream(output))) {
             long start = System.currentTimeMillis();
             pdfGenerator.generateFrom(input, o);
-            log.info("@|green Generated in {1} millis:|@ {0}", output, System.currentTimeMillis() - start);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            log.info("@|green Generated @ {2} in {1} millis:|@ {0}", output, System.currentTimeMillis() - start, dateFormat.format(new Date()));
         } catch (Exception e) {
             throw new PdfGenerationFailedException(output, e);
         }
