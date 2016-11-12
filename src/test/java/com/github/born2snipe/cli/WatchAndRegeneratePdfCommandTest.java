@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -29,11 +28,11 @@ import java.nio.file.StandardCopyOption;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class GeneratePdfCommandTest {
+public class WatchAndRegeneratePdfCommandTest {
     @Rule
     public TemporaryFolder tmpFolder = new TemporaryFolder();
 
-    private GeneratePdfCommand cmd;
+    private WatchAndRegeneratePdfCommand cmd;
     private File workingDir;
     private File inputDir;
     private File inputFile;
@@ -52,25 +51,7 @@ public class GeneratePdfCommandTest {
             Files.copy(input, inputFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
-        cmd = new GeneratePdfCommand();
-    }
-
-    @Test
-    public void shouldGenerateAPdf() {
-        cmd.execute(new CliLog(), workingDir, "-i", inputFile.getAbsolutePath(), "-o", outputFile.getAbsolutePath());
-
-        assertTrue(outputFile.exists());
-        assertTrue(outputFile.length() > 0);
-    }
-
-    @Test
-    public void shouldMakeParentDirectoriesForTheOutputFile() throws IOException {
-        File output = new File(outputDir, "output-child");
-        File outputPdf = new File(output, "test.pdf");
-
-        cmd.execute(new CliLog(), workingDir, "-i", inputFile.getAbsolutePath(), "-o", outputPdf.getAbsolutePath());
-
-        assertTrue(outputPdf.getParentFile().exists());
+        cmd = new WatchAndRegeneratePdfCommand();
     }
 
     @Test

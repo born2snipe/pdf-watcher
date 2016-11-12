@@ -13,6 +13,8 @@
  */
 package com.github.born2snipe.cli.io;
 
+import rx.fileutils.FileSystemEventKind;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -30,20 +32,15 @@ public class TestListener implements DirectoryWatcher.Listener {
     private List<File> filesDeleted = Collections.synchronizedList(new ArrayList<>());
     private List<File> filesModified = Collections.synchronizedList(new ArrayList<>());
 
-
     @Override
-    public void fileCreated(Path file) {
-        filesCreated.add(new File(file.toAbsolutePath().toString()));
-    }
-
-    @Override
-    public void fileDeleted(Path file) {
-        filesDeleted.add(new File(file.toAbsolutePath().toString()));
-    }
-
-    @Override
-    public void fileModified(Path file) {
-        filesModified.add(new File(file.toAbsolutePath().toString()));
+    public void fileChanged(Path file, FileSystemEventKind kindOfChange) {
+        if (kindOfChange == FileSystemEventKind.ENTRY_CREATE) {
+            filesCreated.add(new File(file.toAbsolutePath().toString()));
+        } else if (kindOfChange == FileSystemEventKind.ENTRY_DELETE) {
+            filesDeleted.add(new File(file.toAbsolutePath().toString()));
+        } else if (kindOfChange == FileSystemEventKind.ENTRY_MODIFY) {
+            filesModified.add(new File(file.toAbsolutePath().toString()));
+        }
     }
 
     public void assertFileWasCreated() {

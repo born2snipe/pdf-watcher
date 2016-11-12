@@ -14,31 +14,30 @@
 package com.github.born2snipe.cli;
 
 import cli.pi.CliLog;
-import cli.pi.command.ArgsParsingException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-public class GeneratePdfCommandTest {
+public class WatchAndRegeneratePdfCommandIntegrationTest {
     @Rule
     public TemporaryFolder tmpFolder = new TemporaryFolder();
 
-    private GeneratePdfCommand cmd;
+    private WatchAndRegeneratePdfCommand cmd;
     private File workingDir;
     private File inputDir;
     private File inputFile;
     private File outputDir;
     private File outputFile;
+    private long outputFileLastModifiedAt;
 
     @Before
     public void setUp() throws Exception {
@@ -52,48 +51,39 @@ public class GeneratePdfCommandTest {
             Files.copy(input, inputFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
-        cmd = new GeneratePdfCommand();
+        Files.write(outputFile.toPath(), "test".getBytes(), StandardOpenOption.CREATE_NEW);
+        outputFileLastModifiedAt = outputFile.lastModified();
+
+        cmd = new WatchAndRegeneratePdfCommand();
     }
 
     @Test
-    public void shouldGenerateAPdf() {
+    public void shouldNotHaveAnIndefiniteLoopIfTheOutputPdfIsInTheSameDirectoryAsTheInputFile() {
+        outputFile = new File(inputFile.getParentFile(), "test.pdf");
+
+        UserMakingChangesToHtmlFromAnotherEditor user = new UserMakingChangesToHtmlFromAnotherEditor(10, inputFile) {
+            public void allModificationsCompleted() {
+                cmd.simulateControlC();
+            }
+        };
+        user.start();
+
+        cmd.execute(new CliLog(), workingDir, "-i", inputFile.getAbsolutePath(), "-o", outputFile.getAbsolutePath());
+    }
+
+    @Test
+    public void shouldRegeneratePdfAsChangesAreMade() {
+        UserMakingChangesToHtmlFromAnotherEditor user = new UserMakingChangesToHtmlFromAnotherEditor(10, inputFile) {
+            public void allModificationsCompleted() {
+                cmd.simulateControlC();
+            }
+        };
+        user.start();
+
         cmd.execute(new CliLog(), workingDir, "-i", inputFile.getAbsolutePath(), "-o", outputFile.getAbsolutePath());
 
         assertTrue(outputFile.exists());
-        assertTrue(outputFile.length() > 0);
-    }
-
-    @Test
-    public void shouldMakeParentDirectoriesForTheOutputFile() throws IOException {
-        File output = new File(outputDir, "output-child");
-        File outputPdf = new File(output, "test.pdf");
-
-        cmd.execute(new CliLog(), workingDir, "-i", inputFile.getAbsolutePath(), "-o", outputPdf.getAbsolutePath());
-
-        assertTrue(outputPdf.getParentFile().exists());
-    }
-
-    @Test
-    public void shouldBlowUpIfTheInputFileDoesNotExist() {
-        assertCommandFails("File not found: 'test.html'", "-i", "test.html", "-o", "test.pdf");
-    }
-
-    @Test
-    public void shouldBlowUpIfNoOutputFileIsProvided() {
-        assertCommandFails("--output");
-    }
-
-    @Test
-    public void shouldBlowUpIfNoInputFileIsProvided() {
-        assertCommandFails("--input", "--output", "test.pdf");
-    }
-
-    private void assertCommandFails(String expectedMissingArg, String... args) {
-        try {
-            cmd.execute(new CliLog(), workingDir, args);
-            fail();
-        } catch (ArgsParsingException e) {
-            assertTrue("Actual message: " + e.getMessage(), e.getMessage().contains(expectedMissingArg));
-        }
+        assertTrue(outputFileLastModifiedAt < outputFile.lastModified());
+        assertTrue(outputFile.lastModified() - outputFileLastModifiedAt > 2000L);
     }
 }
