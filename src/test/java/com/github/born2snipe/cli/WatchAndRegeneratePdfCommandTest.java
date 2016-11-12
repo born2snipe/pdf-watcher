@@ -55,24 +55,24 @@ public class WatchAndRegeneratePdfCommandTest {
 
     @Test
     public void shouldBlowUpIfTheInputFileDoesNotExist() {
-        assertCommandFails("File not found: 'does-not-exist.html'", "-i", "does-not-exist.html", "-o", "test.pdf");
+        assertCommandFails("File not found: 'does-not-exist.html'", "does-not-exist.html", "test.pdf");
     }
 
     @Test
     public void shouldBlowUpIfNoOutputFileIsProvided() {
-        assertCommandFails("--output");
+        assertCommandFails("too few arguments");
     }
 
     @Test
     public void shouldBlowUpIfNoInputFileIsProvided() {
-        assertCommandFails("--input", "--output", "test.pdf");
+        assertCommandFails("", "test.pdf");
     }
 
     private void assertCommandFails(String expectedMissingArg, String... args) {
         try {
             cmd.execute(new CliLog(), workingDir, args);
             fail();
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             assertTrue("Actual message: " + e.getMessage(), e.getMessage().contains(expectedMissingArg));
         }
     }

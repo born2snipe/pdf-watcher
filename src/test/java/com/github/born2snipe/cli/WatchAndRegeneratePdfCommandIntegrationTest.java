@@ -68,7 +68,7 @@ public class WatchAndRegeneratePdfCommandIntegrationTest {
         };
         user.start();
 
-        cmd.execute(new CliLog(), workingDir, "-i", inputFile.getAbsolutePath(), "-o", outputFile.getAbsolutePath());
+        cmd.execute(new CliLog(), workingDir, inputFile.getAbsolutePath(), outputFile.getAbsolutePath());
     }
 
     @Test
@@ -80,7 +80,7 @@ public class WatchAndRegeneratePdfCommandIntegrationTest {
         };
         user.start();
 
-        cmd.execute(new CliLog(), workingDir, "-i", inputFile.getAbsolutePath(), "-o", outputFile.getAbsolutePath());
+        cmd.execute(new CliLog(), workingDir, inputFile.getAbsolutePath(), outputFile.getAbsolutePath());
 
         assertTrue(outputFile.exists());
         assertTrue(outputFileLastModifiedAt < outputFile.lastModified());

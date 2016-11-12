@@ -43,8 +43,7 @@ public class WatchAndRegeneratePdfCommand extends GeneratePdfCommand {
 
     @Override
     public String getDescription() {
-        return "Watch the directory of the input file for changes and regenerate the PDF\n\n" +
-                "  @|yellow Example Usage:|@ " + getName() + " -i test.html -o test.pdf";
+        return "Watch the directory of the input file for changes and regenerate the PDF";
     }
 
     @Override

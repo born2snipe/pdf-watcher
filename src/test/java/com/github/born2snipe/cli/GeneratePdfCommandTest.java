@@ -56,7 +56,7 @@ public class GeneratePdfCommandTest {
     public void shouldHandleWhenTheInputAndOutputFilesAreExpectedToBeInTheWorkingDirectory() {
         copyTestHtmlTo(new File(workingDir, inputFile.getName()));
 
-        cmd.execute(new CliLog(), workingDir, "-i", inputFile.getName(), "-o", outputFile.getName());
+        cmd.execute(new CliLog(), workingDir, inputFile.getName(), outputFile.getName());
 
         File expectedOutputFile = new File(workingDir, outputFile.getName());
         assertTrue(expectedOutputFile.exists());
@@ -65,7 +65,7 @@ public class GeneratePdfCommandTest {
 
     @Test
     public void shouldGenerateAPdf() {
-        cmd.execute(new CliLog(), workingDir, "-i", inputFile.getAbsolutePath(), "-o", outputFile.getAbsolutePath());
+        cmd.execute(new CliLog(), workingDir, inputFile.getAbsolutePath(), outputFile.getAbsolutePath());
 
         assertTrue(outputFile.exists());
         assertTrue(outputFile.length() > 0);
@@ -76,24 +76,24 @@ public class GeneratePdfCommandTest {
         File output = new File(outputDir, "output-child");
         File outputPdf = new File(output, "test.pdf");
 
-        cmd.execute(new CliLog(), workingDir, "-i", inputFile.getAbsolutePath(), "-o", outputPdf.getAbsolutePath());
+        cmd.execute(new CliLog(), workingDir, inputFile.getAbsolutePath(), outputPdf.getAbsolutePath());
 
         assertTrue(outputPdf.getParentFile().exists());
     }
 
     @Test
     public void shouldBlowUpIfTheInputFileDoesNotExist() {
-        assertCommandFails("File not found: 'does-not-exist.html'", "-i", "does-not-exist.html", "-o", "test.pdf");
+        assertCommandFails("File not found: 'does-not-exist.html'", "does-not-exist.html", "test.pdf");
     }
 
     @Test
     public void shouldBlowUpIfNoOutputFileIsProvided() {
-        assertCommandFails("--output");
+        assertCommandFails("too few arguments");
     }
 
     @Test
     public void shouldBlowUpIfNoInputFileIsProvided() {
-        assertCommandFails("--input", "--output", "test.pdf");
+        assertCommandFails("", "test.pdf");
     }
 
     private void assertCommandFails(String expectedMissingArg, String... args) {

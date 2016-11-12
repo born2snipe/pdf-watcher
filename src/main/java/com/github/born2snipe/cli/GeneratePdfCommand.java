@@ -32,17 +32,21 @@ public class GeneratePdfCommand extends CliCommand {
     private PdfGenerator pdfGenerator = new OpenHtmlToPdfGenerator();
 
     public GeneratePdfCommand() {
-        argsParser.addArgument("-i", "--input")
+        argsParser.epilog(" @|yellow Example Usage:|@ " + getName() + " -i test.html -o test.pdf");
+
+        argsParser.addArgument("input")
                 .required(true)
+                .metavar("INPUT-FILE")
                 .type(Arguments.fileType())
                 .dest("input")
-                .help("The input file used to generate the PDF @|red (required)|@");
+                .help("The input file used to generate the PDF");
 
-        argsParser.addArgument("-o", "--output")
+        argsParser.addArgument("output")
                 .required(true)
+                .metavar("PDF-FILE")
                 .type(Arguments.fileType())
                 .dest("output")
-                .help("The output file for the PDF @|red (required)|@");
+                .help("The output file for the PDF");
     }
 
     @Override
@@ -52,8 +56,7 @@ public class GeneratePdfCommand extends CliCommand {
 
     @Override
     public String getDescription() {
-        return "One off command to generate a pdf from a provided file and a provided output filename\n\n" +
-                "  @|yellow Example Usage:|@ "+getName()+" -i test.html -o test.pdf";
+        return "One off command to generate a pdf from a provided file and a provided output filename";
     }
 
     @Override
