@@ -14,7 +14,6 @@
 package com.github.born2snipe.cli;
 
 import cli.pi.CliLog;
-import cli.pi.command.ArgsParsingException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,11 +47,20 @@ public class GeneratePdfCommandTest {
         outputDir = tmpFolder.newFolder("output");
         outputFile = new File(outputDir, "test.pdf");
 
-        try (InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.html")) {
-            Files.copy(input, inputFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        }
+        copyTestHtmlTo(inputFile);
 
         cmd = new GeneratePdfCommand();
+    }
+
+    @Test
+    public void shouldHandleWhenTheInputAndOutputFilesAreExpectedToBeInTheWorkingDirectory() {
+        copyTestHtmlTo(new File(workingDir, inputFile.getName()));
+
+        cmd.execute(new CliLog(), workingDir, "-i", inputFile.getName(), "-o", outputFile.getName());
+
+        File expectedOutputFile = new File(workingDir, outputFile.getName());
+        assertTrue(expectedOutputFile.exists());
+        assertTrue(expectedOutputFile.length() > 0);
     }
 
     @Test
@@ -92,8 +100,17 @@ public class GeneratePdfCommandTest {
         try {
             cmd.execute(new CliLog(), workingDir, args);
             fail();
-        } catch (ArgsParsingException e) {
+        } catch (RuntimeException e) {
             assertTrue("Actual message: " + e.getMessage(), e.getMessage().contains(expectedMissingArg));
         }
     }
+
+    private void copyTestHtmlTo(File file) {
+        try (InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.html")) {
+            Files.copy(input, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

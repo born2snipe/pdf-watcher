@@ -14,7 +14,6 @@
 package com.github.born2snipe.cli;
 
 import cli.pi.CliLog;
-import cli.pi.command.ArgsParsingException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -73,7 +72,7 @@ public class WatchAndRegeneratePdfCommandTest {
         try {
             cmd.execute(new CliLog(), workingDir, args);
             fail();
-        } catch (ArgsParsingException e) {
+        } catch (Exception e) {
             assertTrue("Actual message: " + e.getMessage(), e.getMessage().contains(expectedMissingArg));
         }
     }

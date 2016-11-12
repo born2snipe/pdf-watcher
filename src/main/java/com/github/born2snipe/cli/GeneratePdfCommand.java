@@ -34,13 +34,13 @@ public class GeneratePdfCommand extends CliCommand {
     public GeneratePdfCommand() {
         argsParser.addArgument("-i", "--input")
                 .required(true)
-                .type(Arguments.fileType().verifyCanRead().verifyExists())
+                .type(Arguments.fileType())
                 .dest("input")
                 .help("The input file used to generate the PDF");
 
         argsParser.addArgument("-o", "--output")
                 .required(true)
-                .type(new CanonicalFileArg())
+                .type(Arguments.fileType())
                 .dest("output")
                 .help("The output file for the PDF");
     }
@@ -59,7 +59,21 @@ public class GeneratePdfCommand extends CliCommand {
     protected void executeParsedArgs(CommandContext context) {
         File input = context.getNamespace().get("input");
         File output = context.getNamespace().get("output");
-        output.getParentFile().mkdirs();
+
+        if (input.getParentFile() == null) {
+            input = new File(context.getWorkingDirectory(), input.getName());
+        }
+
+        if (!input.exists()) {
+            throw new IllegalArgumentException("File not found: '" + input.getName() + "'");
+        }
+
+        if (output.getParentFile() == null) {
+            output = new File(context.getWorkingDirectory(), output.getName());
+        } else {
+            output.getParentFile().mkdirs();
+        }
+
 
         generatePdf(input, output, context.getLog());
     }
