@@ -10,23 +10,20 @@
  * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and limitations under the License.
  */
-package com.github.born2snipe.io;
+package com.github.born2snipe.cli;
 
-import java.io.File;
-import java.util.Collection;
+import cli.pi.command.CliCommand;
+import org.openide.util.lookup.ServiceProvider;
 
-public class DirectoryWatcherFactory {
-    public DirectoryWatcher build(Collection<String> directoriesToWatch) {
-        for (String dirPath : directoriesToWatch) {
-            File file = new File(dirPath);
+@ServiceProvider(service = CliCommand.class)
+public class WatchAndRegeneratePdfCommand extends CliCommand {
+    @Override
+    public String getName() {
+        return "watch-and-regenerate";
+    }
 
-            if (!file.exists()) {
-                throw new DirectoryDoesNotExistException(dirPath);
-            } else if (!file.isDirectory()) {
-                throw new NotADirectoryException(dirPath);
-            }
-        }
-
-        return new DirectoryWatcher();
+    @Override
+    public String getDescription() {
+        return "Watch a directory for changes and regenerate the PDF to a provided output directory";
     }
 }

@@ -10,10 +10,11 @@
  * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and limitations under the License.
  */
-package com.github.born2snipe.io;
+package com.github.born2snipe.cli;
 
-public class NotADirectoryException extends RuntimeException {
-    public NotADirectoryException(String dirPath) {
-        super("It appears the path=[" + dirPath + "] provided points to a file and not a directory");
-    }
+import java.io.File;
+import java.io.OutputStream;
+
+public interface PdfGenerator {
+    void generateFrom(File input, OutputStream pdfOutput) throws Exception;
 }

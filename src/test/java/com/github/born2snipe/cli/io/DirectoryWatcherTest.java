@@ -1,16 +1,17 @@
 /**
+ *
  * Copyright to the original author or authors.
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at:
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is
  * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and limitations under the License.
  */
-package com.github.born2snipe.io;
+package com.github.born2snipe.cli.io;
 
 import org.junit.After;
 import org.junit.Before;
@@ -24,6 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Duration;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -69,13 +71,6 @@ public class DirectoryWatcherTest {
     public void shouldNotifyWhenAFileHasBeenModified() throws InterruptedException {
         watcher.start(listener);
 
-        /*
-            Total hack to make this test work more consistent, at least on a Mac.
-            A race condition between the WatchService finding all the files in the directory
-              and making the modification here.
-         */
-        Thread.sleep(1000L);
-
         String filename = "existing.txt";
         modifyFileIn(listenToDir, filename);
 
@@ -86,6 +81,7 @@ public class DirectoryWatcherTest {
     public void shouldNotifyWhenAFileHasBeenDeleted() {
         watcher.start(listener);
 
+        pause();
         String filename = "existing.txt";
         new File(listenToDir, filename).delete();
 
@@ -104,6 +100,8 @@ public class DirectoryWatcherTest {
     }
 
     private void createFileIn(File dir, String filename) {
+        pause();
+
         File file = new File(dir, filename);
         try (OutputStream output = new FileOutputStream(file)) {
             output.write(UUID.randomUUID().toString().getBytes());
@@ -114,12 +112,27 @@ public class DirectoryWatcherTest {
     }
 
     private void modifyFileIn(File dir, String filename) {
+        pause();
+
         File file = new File(dir, filename);
         try (OutputStream output = new FileOutputStream(file, true)) {
             output.write(UUID.randomUUID().toString().getBytes());
             output.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void pause() {
+    /*
+        Total hack to make this test work more consistent, at least on a Mac.
+        A race condition between the WatchService finding all the files in the directory
+          and making the modification here.
+     */
+        try {
+            Thread.sleep(Duration.ofSeconds(1).toMillis());
+        } catch (InterruptedException e) {
+
         }
     }
 }

@@ -10,25 +10,12 @@
  * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and limitations under the License.
  */
-package com.github.born2snipe;
+package com.github.born2snipe.cli;
 
-public abstract class RetryableAssertion {
-    private static final int MAX_ELAPSED_TIME = 60_000;
-    private AssertionError assertionError;
+import java.io.File;
 
-    public void performAssertion() {
-        long start = System.currentTimeMillis();
-        while ((System.currentTimeMillis() - start) < MAX_ELAPSED_TIME) {
-            try {
-                assertion();
-                return;
-            } catch (AssertionError e) {
-                assertionError = e;
-            }
-        }
-
-        throw assertionError;
+public class PdfGenerationFailedException extends RuntimeException {
+    public PdfGenerationFailedException(File pdfFile, Throwable cause) {
+        super("Failed to generate pdf=[" + pdfFile + "]", cause);
     }
-
-    protected abstract void assertion();
 }
