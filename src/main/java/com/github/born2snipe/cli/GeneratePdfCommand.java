@@ -36,13 +36,13 @@ public class GeneratePdfCommand extends CliCommand {
                 .required(true)
                 .type(Arguments.fileType())
                 .dest("input")
-                .help("The input file used to generate the PDF");
+                .help("The input file used to generate the PDF @|red (required)|@");
 
         argsParser.addArgument("-o", "--output")
                 .required(true)
                 .type(Arguments.fileType())
                 .dest("output")
-                .help("The output file for the PDF");
+                .help("The output file for the PDF @|red (required)|@");
     }
 
     @Override
@@ -52,7 +52,8 @@ public class GeneratePdfCommand extends CliCommand {
 
     @Override
     public String getDescription() {
-        return "One off command to generate a pdf from a provided file and a provided output directory";
+        return "One off command to generate a pdf from a provided file and a provided output filename\n\n" +
+                "  @|yellow Example Usage:|@ "+getName()+" -i test.html -o test.pdf";
     }
 
     @Override

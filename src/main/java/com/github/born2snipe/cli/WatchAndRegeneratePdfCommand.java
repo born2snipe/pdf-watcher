@@ -29,11 +29,11 @@ public class WatchAndRegeneratePdfCommand extends GeneratePdfCommand {
     private final Object GENERATING_PDF_LOCK = new Object();
 
     public WatchAndRegeneratePdfCommand() {
-        argsParser.addArgument("-d", "--debug")
+        argsParser.addArgument("-dw", "--debug-watch")
                 .type(boolean.class)
                 .action(Arguments.storeTrue())
                 .dest("debug")
-                .help("Display all debug information to the console");
+                .help("Display all watch events to the console");
     }
 
     @Override
@@ -43,7 +43,8 @@ public class WatchAndRegeneratePdfCommand extends GeneratePdfCommand {
 
     @Override
     public String getDescription() {
-        return "Watch the directory of the input file for changes and regenerate the PDF";
+        return "Watch the directory of the input file for changes and regenerate the PDF\n\n" +
+                "  @|yellow Example Usage:|@ " + getName() + " -i test.html -o test.pdf";
     }
 
     @Override

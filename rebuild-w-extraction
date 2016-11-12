@@ -1,0 +1,1 @@
+mvn clean verify -DskipTests && unzip target/pdf-watcher-bin.zip -d target
