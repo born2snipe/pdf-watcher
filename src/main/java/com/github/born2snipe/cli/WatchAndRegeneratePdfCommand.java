@@ -16,6 +16,7 @@ package com.github.born2snipe.cli;
 import cli.pi.CliLog;
 import cli.pi.command.CliCommand;
 import cli.pi.command.CommandContext;
+import cli.pi.io.PressingOfEnterListener;
 import com.github.born2snipe.cli.io.DirectoryWatcher;
 import net.sourceforge.argparse4j.impl.Arguments;
 import org.openide.util.lookup.ServiceProvider;
