@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 
-public class UserMakingChangesToHtmlFromAnotherEditor extends Thread {
+public class UserMakingChangesToHtmlFromAnotherEditor extends UserInteractionThread {
     private final String HTML = "<html>\n" +
             "<body>\n" +
             "<h1>{placeholder}</h1>\n" +
@@ -31,11 +31,9 @@ public class UserMakingChangesToHtmlFromAnotherEditor extends Thread {
     public UserMakingChangesToHtmlFromAnotherEditor(int numberOfModifications, File inputFile) {
         this.numberOfModifications = numberOfModifications;
         this.inputFile = inputFile;
-        setDaemon(true);
-        setName(getClass().getSimpleName());
     }
 
-    public void run() {
+    protected void performEdits() {
         for (int i = 0; i < numberOfModifications; i++) {
             String updatedHtml = HTML.replace("{placeholder}", "#" + i);
 
@@ -46,19 +44,6 @@ public class UserMakingChangesToHtmlFromAnotherEditor extends Thread {
             }
 
             pause();
-        }
-        allModificationsCompleted();
-    }
-
-    public void allModificationsCompleted() {
-
-    }
-
-    private void pause() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-
         }
     }
 }

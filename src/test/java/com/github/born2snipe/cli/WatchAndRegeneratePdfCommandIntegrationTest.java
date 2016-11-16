@@ -77,14 +77,25 @@ public class WatchAndRegeneratePdfCommandIntegrationTest {
 
     @Test
     public void shouldRegeneratePdfAsChangesAreMade() {
-        dev.willEditTheFile(inputFile, 10);
+        dev.willEditTheFile(inputFile, 3);
         dev.startsWorking();
 
         cmd.execute(dev.getTerminal(), workingDir, inputFile.getAbsolutePath(), outputFile.getAbsolutePath());
 
-        assertEquals(11, dev.getNumberOfTimesThePdfWasGenerated());
+        assertEquals(4, dev.getNumberOfTimesThePdfWasGenerated());
         assertTrue(outputFile.exists());
         assertTrue(outputFileLastModifiedAt < outputFile.lastModified());
         assertTrue(outputFile.lastModified() - outputFileLastModifiedAt > 2000L);
+    }
+
+    @Test
+    public void shouldNotAttemptToRegenerateFileIfTheInputFileWasDeleted() {
+        dev.willDeleteAndExitApp(inputFile);
+        dev.startsWorking();
+
+        cmd.execute(dev.getTerminal(), workingDir, inputFile.getAbsolutePath(), outputFile.getAbsolutePath());
+
+        assertEquals(1, dev.getNumberOfTimesThePdfWasGenerated());
+        assertEquals(0, dev.getNumberOfErrorsSeen());
     }
 }

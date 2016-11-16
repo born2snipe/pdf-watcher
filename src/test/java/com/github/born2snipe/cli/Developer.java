@@ -17,10 +17,12 @@ import java.io.File;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static org.junit.Assert.assertTrue;
+
 public class Developer {
     private final WatchAndRegeneratePdfCommand cmd;
-    private MockCliLog cliLog = new MockCliLog();
-    private Optional<UserMakingChangesToHtmlFromAnotherEditor> useEditorAction = Optional.empty();
+    private MockCliLog cliLog = new MockCliLog(true);
+    private Optional<Thread> userEditorAction = Optional.empty();
     private Optional<Function> afterAllModificationsHandler = Optional.empty();
 
     public Developer(WatchAndRegeneratePdfCommand cmd) {
@@ -45,7 +47,7 @@ public class Developer {
     }
 
     public Developer willEditTheFile(File fileToEdit, int numberOfModifications) {
-        useEditorAction = Optional.of(new UserMakingChangesToHtmlFromAnotherEditor(numberOfModifications, fileToEdit) {
+        userEditorAction = Optional.of(new UserMakingChangesToHtmlFromAnotherEditor(numberOfModifications, fileToEdit) {
             public void allModificationsCompleted() {
                 if (afterAllModificationsHandler.isPresent()) {
                     afterAllModificationsHandler.get().apply(null);
@@ -57,9 +59,9 @@ public class Developer {
     }
 
     public void startsWorking() {
-        if (useEditorAction.isPresent()) {
+        if (userEditorAction.isPresent()) {
             cliLog.addListener(message -> {
-                UserMakingChangesToHtmlFromAnotherEditor thread = useEditorAction.get();
+                Thread thread = userEditorAction.get();
                 if (isWatchingForChanges(message) && !thread.isAlive()) {
                     thread.start();
                 }
@@ -89,5 +91,25 @@ public class Developer {
 
     private boolean isWatchingForChanges(String message) {
         return message.contains("Watching for changes...");
+    }
+
+    public Developer willDeleteAndExitApp(final File fileToDelete) {
+        userEditorAction = Optional.of(new UserInteractionThread() {
+            @Override
+            protected void performEdits() {
+                assertTrue("We failed to delete the file", fileToDelete.delete());
+                pause();
+            }
+
+            @Override
+            public void allModificationsCompleted() {
+                cmd.simulateControlC();
+            }
+        });
+        return this;
+    }
+
+    public long getNumberOfErrorsSeen() {
+        return cliLog.getLines().stream().filter((line) -> line.contains("@|red")).count();
     }
 }

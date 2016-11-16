@@ -20,6 +20,7 @@ import cli.pi.io.PressingOfEnterListener;
 import com.github.born2snipe.cli.io.DirectoryWatcher;
 import net.sourceforge.argparse4j.impl.Arguments;
 import org.openide.util.lookup.ServiceProvider;
+import rx.fileutils.FileSystemEventKind;
 
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
@@ -74,7 +75,7 @@ public class WatchAndRegeneratePdfCommand extends GeneratePdfCommand {
                 log.info("@|yellow [FILE CHANGE]|@ " + kindOfChange + " -- " + file);
             }
 
-            if (changedFile.equals(input)) {
+            if (isNotDeletion(kindOfChange) && changedFile.equals(input)) {
                 synchronized (GENERATING_PDF_LOCK) {
                     WatchAndRegeneratePdfCommand.super.executeParsedArgs(context);
                     logWatchingMessage(log);
@@ -88,6 +89,10 @@ public class WatchAndRegeneratePdfCommand extends GeneratePdfCommand {
         } catch (InterruptedException e) {
 
         }
+    }
+
+    private boolean isNotDeletion(FileSystemEventKind kindOfChange) {
+        return kindOfChange != FileSystemEventKind.ENTRY_DELETE;
     }
 
     private void logWatchingMessage(CliLog log) {
