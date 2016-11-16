@@ -1,4 +1,6 @@
 
+ [![Build Status](https://travis-ci.org/born2snipe/pdf-watcher.svg)](https://travis-ci.org/born2snipe/pdf-watcher)
+
  A simple CLI that will generate a PDF from HTML using the library [Open HTML to PDF](https://github.com/danfickle/openhtmltopdf/).
 
  The current supported commands:
