@@ -17,7 +17,6 @@ import cli.pi.CliLog;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public class MockCliLog extends CliLog {
@@ -49,8 +48,8 @@ public class MockCliLog extends CliLog {
         listeners.add(listener);
     }
 
-    public Collection<String> getLines() {
-        return Collections.unmodifiableList(printedLines);
+    public synchronized Collection<String> getLines() {
+        return new ArrayList<>(printedLines);
     }
 
     public interface Listener {

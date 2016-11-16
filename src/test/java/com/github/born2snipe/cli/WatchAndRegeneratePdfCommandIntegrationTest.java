@@ -85,7 +85,6 @@ public class WatchAndRegeneratePdfCommandIntegrationTest {
         assertEquals(4, dev.getNumberOfTimesThePdfWasGenerated());
         assertTrue(outputFile.exists());
         assertTrue(outputFileLastModifiedAt < outputFile.lastModified());
-        assertTrue(outputFile.lastModified() - outputFileLastModifiedAt > 2000L);
     }
 
     @Test

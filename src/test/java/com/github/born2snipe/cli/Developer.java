@@ -13,10 +13,13 @@
  */
 package com.github.born2snipe.cli;
 
+import com.github.born2snipe.AssertRetry;
+
 import java.io.File;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class Developer {
@@ -52,7 +55,15 @@ public class Developer {
                 if (afterAllModificationsHandler.isPresent()) {
                     afterAllModificationsHandler.get().apply(null);
                 }
-                cmd.simulateControlC();
+
+                try {
+                    AssertRetry.assertRetry(2000L, () -> {
+                        assertEquals(numberOfModifications, getNumberOfTimesThePdfWasGenerated() - 1);
+                    });
+                } finally {
+                    cmd.simulateControlC();
+                }
+
             }
         });
         return this;
