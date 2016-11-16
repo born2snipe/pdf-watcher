@@ -31,26 +31,27 @@ public class DirectoryWatcher {
     private ArrayList<Path> directoriesToWatch = new ArrayList<>();
 
     public void start(Listener listener) {
-        Scheduler scheduler = Schedulers.newThread();
-        FileSystemWatcher.Builder builder = FileSystemWatcher.newBuilder();
-        builder.withScheduler(scheduler);
+        for (Path dir : directoriesToWatch) {
+            Scheduler scheduler = Schedulers.newThread();
+            FileSystemWatcher.Builder builder = FileSystemWatcher.newBuilder();
+            builder.withScheduler(scheduler);
 
-        for (Path path : directoriesToWatch) {
-            builder.addPath(path, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+            builder.addPath(dir, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+
+            Observable<FileSystemEvent> observable = builder.build();
+
+            observable.subscribe(fileSystemEvent -> {
+                FileSystemEventKind kind = fileSystemEvent.getFileSystemEventKind();
+                if (kind != OVERFLOW) {
+                    Path path = fileSystemEvent.getPath();
+
+                    Path massaged = Paths.get(dir.toString(), path.toFile().getName());
+
+                    listener.fileChanged(massaged, kind);
+                }
+            });
         }
-        Observable<FileSystemEvent> observable = builder.build();
 
-        observable.subscribe(fileSystemEvent -> {
-            FileSystemEventKind kind = fileSystemEvent.getFileSystemEventKind();
-            if (kind != OVERFLOW) {
-                Path path = fileSystemEvent.getPath();
-
-                // this appears to be only a problem on Mac...
-                Path massaged = Paths.get(path.toString().replaceFirst("^/private", ""));
-
-                listener.fileChanged(massaged, kind);
-            }
-        });
     }
 
     public void stop() {
