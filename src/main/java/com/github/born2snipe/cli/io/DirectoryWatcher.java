@@ -63,7 +63,6 @@ public class DirectoryWatcher {
     }
 
     public void addDir(File directoryToListenTo) {
-        // todo - handle relative paths
         // todo - handle ~ path syntax
 
         if (!directoryToListenTo.exists()) {

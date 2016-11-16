@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 public class Developer {
     private final WatchAndRegeneratePdfCommand cmd;
-    private MockCliLog cliLog = new MockCliLog(true);
+    private MockCliLog cliLog = new MockCliLog(false);
     private Optional<Thread> userEditorAction = Optional.empty();
     private Optional<Function> afterAllModificationsHandler = Optional.empty();
 
