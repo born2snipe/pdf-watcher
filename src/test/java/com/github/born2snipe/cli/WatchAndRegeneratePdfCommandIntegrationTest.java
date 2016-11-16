@@ -13,7 +13,6 @@
  */
 package com.github.born2snipe.cli;
 
-import cli.pi.CliLog;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,6 +22,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class WatchAndRegeneratePdfCommandIntegrationTest {
@@ -36,63 +36,53 @@ public class WatchAndRegeneratePdfCommandIntegrationTest {
     private File outputDir;
     private File outputFile;
     private long outputFileLastModifiedAt;
+    private Developer dev;
 
     @Before
     public void setUp() throws Exception {
         workingDir = tmpFolder.newFolder("working");
         inputDir = tmpFolder.newFolder("input");
-        inputFile = new File(inputDir, "test.html");
+        inputFile = TestHtmlFile.writeTo(inputDir);
         outputDir = tmpFolder.newFolder("output");
         outputFile = new File(outputDir, "test.pdf");
-
-        TestHtmlFile.writeTo(inputFile);
 
         Files.write(outputFile.toPath(), "test".getBytes(), StandardOpenOption.CREATE_NEW);
         outputFileLastModifiedAt = outputFile.lastModified();
 
         cmd = new WatchAndRegeneratePdfCommand();
+        dev = new Developer(cmd);
     }
 
     @Test
     public void shouldHandleWhenTryingToProcessAnInputFileFromTheWorkingDirectory() {
-        inputFile = new File(workingDir, "test.html");
-        TestHtmlFile.writeTo(inputFile);
+        inputFile = TestHtmlFile.writeTo(workingDir);
 
-        UserMakingChangesToHtmlFromAnotherEditor user = new UserMakingChangesToHtmlFromAnotherEditor(10, inputFile) {
-            public void allModificationsCompleted() {
-                cmd.simulateControlC();
-            }
-        };
-        user.start();
+        dev.willKillTheAppAfterSeeingTheFileGenerated();
 
-        cmd.execute(new CliLog(), workingDir, inputFile.getName(), outputFile.getAbsolutePath());
+        cmd.execute(dev.getTerminal(), workingDir, inputFile.getName(), outputFile.getAbsolutePath());
     }
 
     @Test
     public void shouldNotHaveAnIndefiniteLoopIfTheOutputPdfIsInTheSameDirectoryAsTheInputFile() {
         outputFile = new File(inputFile.getParentFile(), "test.pdf");
 
-        UserMakingChangesToHtmlFromAnotherEditor user = new UserMakingChangesToHtmlFromAnotherEditor(10, inputFile) {
-            public void allModificationsCompleted() {
-                cmd.simulateControlC();
-            }
-        };
-        user.start();
+        dev.willEditTheFileOnce(inputFile);
+        dev.willKillTheAppAfterPonderingCareerChoiceForAFewMomentsAfterDoneEditingTheFile();
+        dev.startsWorking();
 
-        cmd.execute(new CliLog(), workingDir, inputFile.getAbsolutePath(), outputFile.getAbsolutePath());
+        cmd.execute(dev.getTerminal(), workingDir, inputFile.getAbsolutePath(), outputFile.getAbsolutePath());
+
+        assertEquals(2, dev.getNumberOfTimesThePdfWasGenerated());
     }
 
     @Test
     public void shouldRegeneratePdfAsChangesAreMade() {
-        UserMakingChangesToHtmlFromAnotherEditor user = new UserMakingChangesToHtmlFromAnotherEditor(10, inputFile) {
-            public void allModificationsCompleted() {
-                cmd.simulateControlC();
-            }
-        };
-        user.start();
+        dev.willEditTheFile(inputFile, 10);
+        dev.startsWorking();
 
-        cmd.execute(new CliLog(), workingDir, inputFile.getAbsolutePath(), outputFile.getAbsolutePath());
+        cmd.execute(dev.getTerminal(), workingDir, inputFile.getAbsolutePath(), outputFile.getAbsolutePath());
 
+        assertEquals(11, dev.getNumberOfTimesThePdfWasGenerated());
         assertTrue(outputFile.exists());
         assertTrue(outputFileLastModifiedAt < outputFile.lastModified());
         assertTrue(outputFile.lastModified() - outputFileLastModifiedAt > 2000L);

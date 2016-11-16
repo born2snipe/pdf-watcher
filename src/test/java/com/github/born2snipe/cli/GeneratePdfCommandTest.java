@@ -44,14 +44,14 @@ public class GeneratePdfCommandTest {
         outputDir = tmpFolder.newFolder("output");
         outputFile = new File(outputDir, "test.pdf");
 
-        TestHtmlFile.writeTo(inputFile);
+        inputFile = TestHtmlFile.writeTo(inputDir);
 
         cmd = new GeneratePdfCommand();
     }
 
     @Test
     public void shouldHandleWhenTheInputAndOutputFilesAreExpectedToBeInTheWorkingDirectory() {
-        TestHtmlFile.writeTo(new File(workingDir, inputFile.getName()));
+        inputFile = TestHtmlFile.writeTo(workingDir);
 
         cmd.execute(new CliLog(), workingDir, inputFile.getName(), outputFile.getName());
 

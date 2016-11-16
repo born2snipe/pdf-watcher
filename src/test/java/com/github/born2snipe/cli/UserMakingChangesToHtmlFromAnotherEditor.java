@@ -31,6 +31,8 @@ public class UserMakingChangesToHtmlFromAnotherEditor extends Thread {
     public UserMakingChangesToHtmlFromAnotherEditor(int numberOfModifications, File inputFile) {
         this.numberOfModifications = numberOfModifications;
         this.inputFile = inputFile;
+        setDaemon(true);
+        setName(getClass().getSimpleName());
     }
 
     public void run() {
@@ -54,7 +56,7 @@ public class UserMakingChangesToHtmlFromAnotherEditor extends Thread {
 
     private void pause() {
         try {
-            Thread.sleep(500);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
 
         }
