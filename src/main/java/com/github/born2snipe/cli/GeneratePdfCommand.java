@@ -61,12 +61,8 @@ public class GeneratePdfCommand extends CliCommand {
 
     @Override
     protected void executeParsedArgs(CommandContext context) {
-        File input = context.getNamespace().get("input");
+        File input = InputFile.get(context.getNamespace().get("input"), context.getWorkingDirectory());
         File output = context.getNamespace().get("output");
-
-        if (input.getParentFile() == null) {
-            input = new File(context.getWorkingDirectory(), input.getName());
-        }
 
         if (!input.exists()) {
             throw new IllegalArgumentException("File not found: '" + input.getName() + "'");

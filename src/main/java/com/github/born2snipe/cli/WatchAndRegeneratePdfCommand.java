@@ -52,7 +52,7 @@ public class WatchAndRegeneratePdfCommand extends GeneratePdfCommand {
         super.executeParsedArgs(context);
 
         final CliLog log = context.getLog();
-        final File input = context.getNamespace().get("input");
+        final File input = InputFile.get(context.getNamespace().get("input"), context.getWorkingDirectory());
         final boolean debug = context.getNamespace().get("debug");
 
         PressingOfEnterListener pressingOfEnterListener = new PressingOfEnterListener() {

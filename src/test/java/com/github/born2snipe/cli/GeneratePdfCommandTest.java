@@ -21,9 +21,6 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -47,14 +44,14 @@ public class GeneratePdfCommandTest {
         outputDir = tmpFolder.newFolder("output");
         outputFile = new File(outputDir, "test.pdf");
 
-        copyTestHtmlTo(inputFile);
+        TestHtmlFile.writeTo(inputFile);
 
         cmd = new GeneratePdfCommand();
     }
 
     @Test
     public void shouldHandleWhenTheInputAndOutputFilesAreExpectedToBeInTheWorkingDirectory() {
-        copyTestHtmlTo(new File(workingDir, inputFile.getName()));
+        TestHtmlFile.writeTo(new File(workingDir, inputFile.getName()));
 
         cmd.execute(new CliLog(), workingDir, inputFile.getName(), outputFile.getName());
 
@@ -102,14 +99,6 @@ public class GeneratePdfCommandTest {
             fail();
         } catch (RuntimeException e) {
             assertTrue("Actual message: " + e.getMessage(), e.getMessage().contains(expectedMissingArg));
-        }
-    }
-
-    private void copyTestHtmlTo(File file) {
-        try (InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.html")) {
-            Files.copy(input, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 

@@ -20,9 +20,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
-import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 
 import static org.junit.Assert.assertTrue;
@@ -47,14 +45,27 @@ public class WatchAndRegeneratePdfCommandIntegrationTest {
         outputDir = tmpFolder.newFolder("output");
         outputFile = new File(outputDir, "test.pdf");
 
-        try (InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.html")) {
-            Files.copy(input, inputFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        }
+        TestHtmlFile.writeTo(inputFile);
 
         Files.write(outputFile.toPath(), "test".getBytes(), StandardOpenOption.CREATE_NEW);
         outputFileLastModifiedAt = outputFile.lastModified();
 
         cmd = new WatchAndRegeneratePdfCommand();
+    }
+
+    @Test
+    public void shouldHandleWhenTryingToProcessAnInputFileFromTheWorkingDirectory() {
+        inputFile = new File(workingDir, "test.html");
+        TestHtmlFile.writeTo(inputFile);
+
+        UserMakingChangesToHtmlFromAnotherEditor user = new UserMakingChangesToHtmlFromAnotherEditor(10, inputFile) {
+            public void allModificationsCompleted() {
+                cmd.simulateControlC();
+            }
+        };
+        user.start();
+
+        cmd.execute(new CliLog(), workingDir, inputFile.getName(), outputFile.getAbsolutePath());
     }
 
     @Test
